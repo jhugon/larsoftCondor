@@ -1,0 +1,16 @@
+
+## Condor Settings
+universe = vanilla
+transfer_executable = true
+priority = 1000
+request_memory = 512m
+log = logCondor
+
+## Our Job
+executable = run_larsoft.sh
+arguments = fcl 10
+output = log
+error = logerr
+
+## Queue the Job
+queue
