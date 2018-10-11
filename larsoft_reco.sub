@@ -1,0 +1,15 @@
+
+## Condor Settings
+universe = vanilla
+priority = 1000
+request_memory = 512m
+
+## Our Job
+executable = run_larsoft_reco.sh
+log = reco_$Fn(Arguments).condorlog
+output = reco_$Fn(Arguments).stdout
+error = reco_$Fn(Arguments).stderr
+env = "ClusterId=$(ClusterId) ProcId=$(ProcId) infilebasename=$Fn(Args)"
+
+## Queue the Job
+queue
