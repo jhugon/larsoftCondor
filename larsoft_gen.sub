@@ -11,6 +11,7 @@ executable = run_larsoft.sh
 arguments = fcl 10
 output = log
 error = logerr
+env = "ClusterId=$(ClusterId) ProcId=$(ProcId)"
 
 ## Queue the Job
 queue
