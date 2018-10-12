@@ -2,7 +2,7 @@
 ## Condor Settings
 universe = vanilla
 priority = 1000
-request_memory = 512m
+request_memory = 1536m
 
 ## Our Job
 executable = run_larsoft_reco.sh
