@@ -1,17 +1,21 @@
 
 ## Condor Settings
 universe = vanilla
-transfer_executable = true
 priority = 1000
-request_memory = 512m
-log = logCondor
+request_memory = 1536m
+
+# figure out how many jobs to run
+nEventsPerJob = 10
+# defines nEventsTotal and nJobs
+include : ./getNEvents.sh $(nEventsPerJob) $(Arguments) |
 
 ## Our Job
 executable = run_larsoft.sh
-arguments = fcl 10
-output = log
-error = logerr
-env = "ClusterId=$(ClusterId) ProcId=$(ProcId)"
+log = reco_$Fn(Arguments)_job$(ProcId).condorlog
+output = reco_$Fn(Arguments)_job$(ProcId).stdout
+error = reco_$Fn(Arguments)_job$(ProcId).stderr
+
+env = "ClusterId=$(ClusterId) ProcId=$(ProcId) infilebasename=$Fn(Arguments) nEventsTotal=$(nEventsTotal) nJobs=$(nJobs) nEventsPerJob=$(nEventsPerJob)"
 
 ## Queue the Job
-queue
+queue $(nJobs)

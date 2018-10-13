@@ -3,11 +3,29 @@
 version=v07_07_00_01
 qual=prof:e17
 nmax=1000
-outdir="/scratch/jhugon/np04_data/reco"
+#outdir="/scratch/jhugon/np04_data/reco"
+outdir="/cshare/vol2/users/jhugon/condor_output/reco"
 
 if [ -z "$1" ]; then
     echo "No argument supplied, input raw data file required."
     exit 1
+fi
+
+if [ -z "$nEventsTotal" ]; then
+  echo "Error nEventsTotal ENV var not set"
+  exit 1;
+fi
+if [ -z "$nEventsPerJob" ]; then
+  echo "Error nEventsPerJob ENV var not set"
+  exit 1;
+fi
+if [ -z "$nJobs" ]; then
+  echo "Error nJobs ENV var not set"
+  exit 1;
+fi
+if [ -z "$ProcId" ]; then
+  echo "Error ProcId ENV var not set"
+  exit 1;
 fi
 
 date
@@ -34,23 +52,25 @@ setup mrb
 setup dunetpc $version -q $qual
 echo "Done setting up DUNE software"
 
-totalEvents=$(python -c "import ROOT; f = ROOT.TFile(\"${infilename}\"); print f.Events.GetEntries()")
-echo "Events in file: $totalEvents"
-if [ -z "$NJOBS" ]; then
-    NJOBS=1
-fi
-if [ -z "$ProcId" ]; then
-    ProcId=0
-fi
-eventsPerJob=$(python -c "import math; print int(math.ceil(float($totalEvents)/$NJOBS))")
-echo "Events Per Job: $eventsPerJob"
+#nEventsTotal=$(python -c "import ROOT; f = ROOT.TFile(\"${infilename}\"); print f.Events.GetEntries()")
+#echo "Events in file: $nEventsTotal"
+#if [ -z "$nJobs" ]; then
+#    nJobs=1
+#fi
+#if [ -z "$ProcId" ]; then
+#    ProcId=0
+#fi
+#nEventsPerJob=$(python -c "import math; print int(math.ceil(float($nEventsTotal)/$nJobs))")
+echo "Total Events: $nEventsTotal"
+echo "Events Per Job: $nEventsPerJob"
 echo "ProcId: $ProcId"
-nSkip=$(python -c "print ${ProcId}*${eventsPerJob}")
+nSkip=$(python -c "print ${ProcId}*${nEventsPerJob}")
 echo "nSkip: $nSkip"
-nmax=$(python -c "print min($nmax,$eventsPerJob)")
-jobSuffix=$(python -c "print \"_job${ProcId}\" if $NJOBS > 1 else \"\"")
+nmax=$(python -c "print min($nmax,$nEventsPerJob)")
+jobSuffix=$(python -c "print \"_job${ProcId}\" if $nJobs > 1 else \"\"")
 
 infilebase=$(basename $1 .root)
+outdir=$outdir/$infilebase
 unpackedfilename="${infilebase}_unpacked_${version}${jobSuffix}.root"
 unpackedHistsfilename="hists_${infilebase}_unpacked_${version}${jobSuffix}.root"
 unpackedLogfilename="${infilebase}_unpacked_${version}${jobSuffix}.log"
@@ -68,21 +88,23 @@ echo "outdir: $outdir"
 echo "nmax: $nmax"
 echo "version: $version"
 echo "qual: $qual"
-unpackcommand="nice lar -c RunRawDecoder.fcl -n $nmax -s $infilename -o $unpackedfilename -T $unpackedHistsfilename"
-command="nice lar -c protoDUNE_reco_data.fcl -n $nmax -s $unpackedfilename -o $outfilename -T $histsfilename"
+unpackcommand="nice lar -c RunRawDecoder.fcl --nskip $nSkip -n $nmax -s $infilename -o $unpackedfilename -T $unpackedHistsfilename"
+command="nice lar -c protoDUNE_reco_data.fcl -s $unpackedfilename -o $outfilename -T $histsfilename"
 
 echo "Running: \"$unpackcommand\""
-#nice $unpackcommand >& $unpackedLogfilename
+nice $unpackcommand >& $unpackedLogfilename
 echo "Running: \"$command\""
-#nice $command >& $logfilename
-#echo "Done!"
-#echo "=================================="
-#ls -lhtr
-#echo "=================================="
-#echo "Copying to output directory..."
-#cp $logfilename $outdir
-#cp $unpackedLogfilename $outdir
-#cp $histsfilename $outdir
-#cp $outfilename $outdir
-#echo "Done!"
-#date
+nice $command >& $logfilename
+echo "Done!"
+echo "=================================="
+ls -lhtr
+echo "=================================="
+echo "Making ouput directory: $outdir"
+mkdir -p $outdir
+echo "Copying to output directory..."
+cp $logfilename $outdir
+cp $unpackedLogfilename $outdir
+cp $histsfilename $outdir
+cp $outfilename $outdir
+echo "Done!"
+date
