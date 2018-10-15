@@ -1,8 +1,31 @@
 #!/bin/bash
 
+version=v07_07_00_01
+qual=prof:e17
+nmax=1000
+#outdir="/scratch/jhugon/np04_data/reco"
+outdir="/cshare/vol2/users/jhugon/condor_output/reco"
+
 if [ -z "$1" ]; then
     echo "No argument supplied, input raw data file required."
     exit 1
+fi
+
+if [ -z "$nEventsTotal" ]; then
+  echo "Error nEventsTotal ENV var not set"
+  exit 1;
+fi
+if [ -z "$nEventsPerJob" ]; then
+  echo "Error nEventsPerJob ENV var not set"
+  exit 1;
+fi
+if [ -z "$nJobs" ]; then
+  echo "Error nJobs ENV var not set"
+  exit 1;
+fi
+if [ -z "$ProcId" ]; then
+  echo "Error ProcId ENV var not set"
+  exit 1;
 fi
 
 date
@@ -14,39 +37,6 @@ infilename=$(realpath $1)
 cd $TMPDIR
 echo "work dir:"
 pwd
-
-version=v07_07_00_01
-qual=prof:e17
-nmax=1000
-
-outdir="/scratch/jhugon/np04_data/reco"
-
-infilebase=$(basename $1 .root)
-unpackedfilename="${infilebase}_unpacked_${version}.root"
-unpackedHistsfilename="hists_${infilebase}_unpacked_${version}.root"
-unpackedLogfilename="${infilebase}_unpacked_${version}.log"
-outfilename="${infilebase}_reco_${version}.root"
-histsfilename="hists_${infilebase}_reco_${version}.root"
-logfilename="${infilebase}_reco_${version}.log"
-#unpackedfilename="$databasedir/unpacked/${infilebase}_unpacked_${version}.root"
-#unpackedHistsfilename="$databasedir/unpacked/hists_${infilebase}_unpacked_${version}.root"
-#unpackedLogfilename="$databasedir/unpacked/${infilebase}_unpacked_${version}.log"
-#outfilename="$databasedir/reco/${infilebase}_reco_${version}.root"
-#histsfilename="$databasedir/reco/hists_${infilebase}_reco_${version}.root"
-#logfilename="$databasedir/reco/${infilebase}_reco_${version}.log"
-echo "infilename: $infilename"
-echo "unpackedFilename: $unpackedfilename"
-echo "unpackedHistsfilename: $unpackedHistsfilename"
-echo "unpackedLogfilename: $unpackedLogfilename"
-echo "outfilename: $outfilename"
-echo "histsfilename: $histsfilename"
-echo "logfilename: $logfilename"
-echo "outdir: $outdir"
-echo "nmax: $nmax"
-echo "version: $version"
-echo "qual: $qual"
-unpackcommand="nice lar -c RunRawDecoder.fcl -n $nmax -s $infilename -o $unpackedfilename -T $unpackedHistsfilename"
-command="nice lar -c protoDUNE_reco_data.fcl -n $nmax -s $unpackedfilename -o $outfilename -T $histsfilename"
 
 echo "=================================="
 echo "=========== env =================="
@@ -62,6 +52,45 @@ setup mrb
 setup dunetpc $version -q $qual
 echo "Done setting up DUNE software"
 
+#nEventsTotal=$(python -c "import ROOT; f = ROOT.TFile(\"${infilename}\"); print f.Events.GetEntries()")
+#echo "Events in file: $nEventsTotal"
+#if [ -z "$nJobs" ]; then
+#    nJobs=1
+#fi
+#if [ -z "$ProcId" ]; then
+#    ProcId=0
+#fi
+#nEventsPerJob=$(python -c "import math; print int(math.ceil(float($nEventsTotal)/$nJobs))")
+echo "Total Events: $nEventsTotal"
+echo "Events Per Job: $nEventsPerJob"
+echo "ProcId: $ProcId"
+nSkip=$(python -c "print ${ProcId}*${nEventsPerJob}")
+echo "nSkip: $nSkip"
+nmax=$(python -c "print min($nmax,$nEventsPerJob)")
+jobSuffix=$(python -c "print \"_job${ProcId}\" if $nJobs > 1 else \"\"")
+
+infilebase=$(basename $1 .root)
+outdir=$outdir/$infilebase
+unpackedfilename="${infilebase}_unpacked_${version}${jobSuffix}.root"
+unpackedHistsfilename="hists_${infilebase}_unpacked_${version}${jobSuffix}.root"
+unpackedLogfilename="${infilebase}_unpacked_${version}${jobSuffix}.log"
+outfilename="${infilebase}_reco_${version}${jobSuffix}.root"
+histsfilename="hists_${infilebase}_reco_${version}${jobSuffix}.root"
+logfilename="${infilebase}_reco_${version}${jobSuffix}.log"
+echo "infilename: $infilename"
+echo "unpackedFilename: $unpackedfilename"
+echo "unpackedHistsfilename: $unpackedHistsfilename"
+echo "unpackedLogfilename: $unpackedLogfilename"
+echo "outfilename: $outfilename"
+echo "histsfilename: $histsfilename"
+echo "logfilename: $logfilename"
+echo "outdir: $outdir"
+echo "nmax: $nmax"
+echo "version: $version"
+echo "qual: $qual"
+unpackcommand="nice lar -c RunRawDecoder.fcl --nskip $nSkip -n $nmax -s $infilename -o $unpackedfilename -T $unpackedHistsfilename"
+command="nice lar -c protoDUNE_reco_data.fcl -s $unpackedfilename -o $outfilename -T $histsfilename"
+
 echo "Running: \"$unpackcommand\""
 nice $unpackcommand >& $unpackedLogfilename
 echo "Running: \"$command\""
@@ -70,6 +99,8 @@ echo "Done!"
 echo "=================================="
 ls -lhtr
 echo "=================================="
+echo "Making ouput directory: $outdir"
+mkdir -p $outdir
 echo "Copying to output directory..."
 cp $logfilename $outdir
 cp $unpackedLogfilename $outdir

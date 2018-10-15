@@ -2,14 +2,20 @@
 ## Condor Settings
 universe = vanilla
 priority = 1000
-request_memory = 1536m
+request_memory = 2048m
+
+# figure out how many jobs to run
+nEventsPerJob = 10
+# defines nEventsTotal and nJobs
+include : ./getNEvents.sh $(nEventsPerJob) $(Arguments) |
 
 ## Our Job
 executable = run_larsoft_reco.sh
-log = reco_$Fn(Arguments).condorlog
-output = reco_$Fn(Arguments).stdout
-error = reco_$Fn(Arguments).stderr
-env = "ClusterId=$(ClusterId) ProcId=$(ProcId) infilebasename=$Fn(Args)"
+log = reco_$Fn(Arguments)_job$(ProcId).condorlog
+output = reco_$Fn(Arguments)_job$(ProcId).stdout
+error = reco_$Fn(Arguments)_job$(ProcId).stderr
+
+env = "ClusterId=$(ClusterId) ProcId=$(ProcId) infilebasename=$Fn(Arguments) nEventsTotal=$(nEventsTotal) nJobs=$(nJobs) nEventsPerJob=$(nEventsPerJob)"
 
 ## Queue the Job
-queue
+queue $(nJobs)
