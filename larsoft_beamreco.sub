@@ -1,0 +1,18 @@
+
+## Condor Settings
+universe = vanilla
+priority = 1000
+request_memory = 2048m
+
+# figure out how many jobs to run
+
+## Our Job
+executable = run_larsoft_beamreco.sh
+log = beamreco_$Fn(Arguments).condorlog
+output = beamreco_$Fn(Arguments).stdout
+error = beamreco_$Fn(Arguments).stderr
+
+env = "ClusterId=$(ClusterId) ProcId=$(ProcId) infilebasename=$Fn(Arguments)"
+
+## Queue the Job
+queue

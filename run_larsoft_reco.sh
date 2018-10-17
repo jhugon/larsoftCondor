@@ -88,13 +88,13 @@ echo "outdir: $outdir"
 echo "nmax: $nmax"
 echo "version: $version"
 echo "qual: $qual"
-unpackcommand="nice lar -c RunRawDecoder.fcl --nskip $nSkip -n $nmax -s $infilename -o $unpackedfilename -T $unpackedHistsfilename"
-command="nice lar -c protoDUNE_reco_data.fcl -s $unpackedfilename -o $outfilename -T $histsfilename"
+unpackcommand="lar -c RunRawDecoder.fcl --nskip $nSkip -n $nmax -s $infilename -o $unpackedfilename -T $unpackedHistsfilename"
+command="lar -c protoDUNE_reco_data.fcl -s $unpackedfilename -o $outfilename -T $histsfilename"
 
 echo "Running: \"$unpackcommand\""
-nice $unpackcommand >& $unpackedLogfilename
+$unpackcommand >& $unpackedLogfilename
 echo "Running: \"$command\""
-nice $command >& $logfilename
+$command >& $logfilename
 echo "Done!"
 echo "=================================="
 ls -lhtr
