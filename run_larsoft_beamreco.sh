@@ -4,7 +4,7 @@ setupDirectory=/scratch/jhugon/v07_07_01_e17debug
 setupScript=$setupDirectory/setup.sh
 
 nmax=1000
-outdir="/cshare/vol2/users/jhugon/condor_output/beamreco"
+outdir="/cshare/vol2/users/jhugon/condor_output/beamrecoTestHits"
 
 if [ -z "$1" ]; then
     echo "No argument supplied, input raw data file required."
