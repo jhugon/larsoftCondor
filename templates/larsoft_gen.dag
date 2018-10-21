@@ -1,0 +1,17 @@
+JOB GEN larsoft_gen.sub
+JOB G4 larsoft_gen.sub
+JOB DETSIM larsoft_gen.sub
+JOB RECO larsoft_gen.sub
+PARENT GEN CHILD G4
+PARENT G4 CHILD DETSIM
+PARENT DETSIM CHILD RECO
+VARS ALL_NODES iRun="$iRun"
+VARS ALL_NODES nevents="$nevents"
+VARS ALL_NODES neventsperjob="$neventsperjob"
+VARS ALL_NODES nRuns="$nRuns"
+VARS ALL_NODES output_directory="$output_directory"
+VARS ALL_NODES env="nevents=$nevents neventsperjob=$neventsperjob output_directory=$output_directory iRun=$iRun ClusterId=$$(ClusterId) ProcId=$$(ProcId)"
+VARS GEN Arguments="$gen_args"
+VARS G4 Arguments="$g4_args"
+VARS DETSIM Arguments="$detsim_args"
+VARS RECO Arguments="$reco_args"
