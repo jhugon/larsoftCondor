@@ -7,6 +7,7 @@ from __future__ import division
 
 import os
 import os.path
+import shutil
 import subprocess
 import argparse
 import string
@@ -20,6 +21,8 @@ if __name__ == "__main__":
   DEFAULT_G4_FCL = "protoDUNE_g4_3ms_sce.fcl"
   DEFAULT_DETSIM_FCL = "protoDUNE_detsim_pdnoise.fcl"
   DEFAULT_RECO_FCL = "protoDUNE_reco.fcl"
+  DEFAULT_VERSION = "v07_07_01"
+  DEFAULT_QUAL = "e17:prof"
 
   parser = argparse.ArgumentParser(description="Submits LArSoft Gen-G4-Detsim-Reco jobs to HTCondor as DAGs")
   parser.add_argument("-n","--nevents",type=int,required=True,help="Total number of events to generate")
@@ -29,6 +32,8 @@ if __name__ == "__main__":
   parser.add_argument("--g4_fcl",default=DEFAULT_G4_FCL,help="fcl file to use for GEATN4 particle simulation, default: '{}'".format(DEFAULT_G4_FCL))
   parser.add_argument("--detsim_fcl",default=DEFAULT_DETSIM_FCL,help="fcl file to use for detector simulation, default: '{}'".format(DEFAULT_DETSIM_FCL))
   parser.add_argument("--reco_fcl",default=DEFAULT_RECO_FCL,help="fcl file to use for reconstruction, default: '{}'".format(DEFAULT_RECO_FCL))
+  parser.add_argument("--version",default=DEFAULT_VERSION,help="dunetpc software version, default: '{}'".format(DEFAULT_VERSION))
+  parser.add_argument("--qual",default=DEFAULT_QUAL,help="dunetpc software qualifier, default: '{}'".format(DEFAULT_QUAL))
   parser.add_argument("output_directory",help="output directory")
 
   args = parser.parse_args(['-n','30',"gen_single.fcl","/output"])
@@ -42,6 +47,13 @@ if __name__ == "__main__":
   genBase = os.path.splitext(genBase)[0]
   genBase = genBase.replace("gen_","")
   outDir = args.output_directory + "/{}_{}/".format(genBase,now)
+  logOutDir = "{}_{}/".format(genBase,now)
+  os.makedirs(logOutDir)
+  runScriptFn = os.path.join(logOutDir,"run_larsoft_simple.sh")
+  subScriptFn = os.path.join(logOutDir,"larsoft_gen.sub")
+  shutil.copyfile("run_larsoft_simple.sh",runScriptFn)
+  shutil.copyfile("templates/larsoft_gen.sub",subScriptFn)
+  os.chmod(runScriptFn,0o0755)
 
   for iRun in range(nRuns):
     genOut = "events_{}_{}_{}_gen.root".format(genBase,now,iRun)
@@ -53,7 +65,18 @@ if __name__ == "__main__":
       "g4_args": "-c {} {} -o {}".format(args.g4_fcl,os.path.join(outDir,genOut),g4Out),
       "detsim_args": "-c {} {} -o {}".format(args.detsim_fcl,os.path.join(outDir,g4Out),detsimOut),
       "reco_args": "-c {} {} -o {}".format(args.reco_fcl,os.path.join(outDir,detsimOut),recoOut),
+      "gen_transfer_output_files": "log,{}".format(genOut),
+      "gen_transfer_output_remaps": "log={}/log_gen{};{}={}".format(outDir,iRun,genOut,os.path.join(outDir,genOut)),
+      "g4_transfer_output_files": "log,{}".format(g4Out),
+      "g4_transfer_output_remaps": "log={}/log_g4{};{}={}".format(outDir,iRun,g4Out,os.path.join(outDir,g4Out)),
+      "detsim_transfer_output_files": "log,{}".format(detsimOut),
+      "detsim_transfer_output_remaps": "log={}/log_detsim{};{}={}".format(outDir,iRun,detsimOut,os.path.join(outDir,detsimOut)),
+      "reco_transfer_output_files": "log,{}".format(recoOut),
+      "reco_transfer_output_remaps": "log={}/log_reco{};{}={}".format(outDir,iRun,recoOut,os.path.join(outDir,recoOut)),
     }
+    for job in ["gen","g4","detsim","reco"]:
+      for fn in ["log","output","error"]:
+        script_args[job+"_"+fn] = os.path.join(logOutDir,"{}_{}.{}".format(job,iRun,fn))
     templateParams = script_args.copy()
     templateParams.update(vars(args))
     templateParams["iRun"] = iRun
@@ -64,4 +87,6 @@ if __name__ == "__main__":
     with open("templates/larsoft_gen.dag") as dagTemplateFile:
       dagTemplate = string.Template(dagTemplateFile.read())
       dagText = dagTemplate.substitute(templateParams)
-    print(dagText)
+    dagFn = os.path.join(logOutDir,"job_{}.dag".format(iRun))
+    with open(dagFn,'w') as dag:
+      dag.write(dagText)

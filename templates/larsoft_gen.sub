@@ -1,21 +1,14 @@
-
+## Most things are defined in the dag file
+#
 ## Condor Settings
 universe = vanilla
 priority = 1000
 request_memory = 2048m
-
-# figure out how many jobs to run
-nEventsPerJob = 10
-# defines nEventsTotal and nJobs
-include : ./getNEvents.sh $(nEventsPerJob) $(Arguments) |
+#should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
 
 ## Our Job
-executable = run_larsoft_reco.sh
-log = reco_$Fn(Arguments)_job$(ProcId).condorlog
-output = reco_$Fn(Arguments)_job$(ProcId).stdout
-error = reco_$Fn(Arguments)_job$(ProcId).stderr
-
-env = "ClusterId=$(ClusterId) ProcId=$(ProcId) infilebasename=$Fn(Arguments) nEventsTotal=$(nEventsTotal) nJobs=$(nJobs) nEventsPerJob=$(nEventsPerJob)"
+executable = run_larsoft_simple.sh
 
 ## Queue the Job
-queue $(nJobs)
+queue
