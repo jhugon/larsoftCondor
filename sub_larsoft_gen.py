@@ -69,17 +69,17 @@ if __name__ == "__main__":
       "detsim_args": "-c {} {} -o {}".format(args.detsim_fcl,os.path.join(outDir,g4Out),detsimOut),
       "reco_args": "-c {} {} -o {}".format(args.reco_fcl,os.path.join(outDir,detsimOut),recoOut),
       "gen_transfer_output_files": "log,{}".format(genOut),
-      "gen_transfer_output_remaps": "log={}/log_gen{};{}={}".format(outDir,iRun,genOut,os.path.join(outDir,genOut)),
+      "gen_transfer_output_remaps": "log={}/log_gen_{};{}={}".format(outDir,iRun,genOut,os.path.join(outDir,genOut)),
       "g4_transfer_output_files": "log,{}".format(g4Out),
-      "g4_transfer_output_remaps": "log={}/log_g4{};{}={}".format(outDir,iRun,g4Out,os.path.join(outDir,g4Out)),
+      "g4_transfer_output_remaps": "log={}/log_g4_{};{}={}".format(outDir,iRun,g4Out,os.path.join(outDir,g4Out)),
       "detsim_transfer_output_files": "log,{}".format(detsimOut),
-      "detsim_transfer_output_remaps": "log={}/log_detsim{};{}={}".format(outDir,iRun,detsimOut,os.path.join(outDir,detsimOut)),
+      "detsim_transfer_output_remaps": "log={}/log_detsim_{};{}={}".format(outDir,iRun,detsimOut,os.path.join(outDir,detsimOut)),
       "reco_transfer_output_files": "log,{}".format(recoOut),
-      "reco_transfer_output_remaps": "log={}/log_reco{};{}={}".format(outDir,iRun,recoOut,os.path.join(outDir,recoOut)),
+      "reco_transfer_output_remaps": "log={}/log_reco_{};{}={}".format(outDir,iRun,recoOut,os.path.join(outDir,recoOut)),
     }
     for job in ["gen","g4","detsim","reco"]:
       for fn in ["log","output","error"]:
-        script_args[job+"_"+fn] = os.path.join(logOutDir,"{}_{}.{}".format(job,iRun,fn))
+        script_args[job+"_"+fn] = "{}_{}.{}".format(job,iRun,fn)
     templateParams = script_args.copy()
     templateParams.update(vars(args))
     templateParams["iRun"] = iRun

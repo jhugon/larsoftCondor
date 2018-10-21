@@ -2,7 +2,7 @@
 
 date
 echo "Starting larsoft simple job"
-echo "Submit dir: "
+echo "Initial dir: "
 pwd
 echo "args: "$@
 
@@ -25,7 +25,9 @@ setup dunetpc $version -q $qual
 echo "Done setting up DUNE software"
 
 echo "Running lar..."
-lar $@
+lar $@ >& log
 
 echo "Done!"
+echo "Files in work dir:"
+ls -lhtr
 date
