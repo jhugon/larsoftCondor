@@ -17,7 +17,7 @@ import math
 if __name__ == "__main__":
 
   DEFAULT_NEVENTSPERJOB = 10
-  DEFAULT_ESTART = 0
+  DEFAULT_ESTART = 1
   DEFAULT_G4_FCL = "protoDUNE_g4_3ms_sce.fcl"
   DEFAULT_DETSIM_FCL = "protoDUNE_detsim_pdnoise.fcl"
   DEFAULT_RECO_FCL = "protoDUNE_reco.fcl"
