@@ -15,14 +15,20 @@ import math
 
 if __name__ == "__main__":
 
+  DEFAULT_NEVENTSPERJOB = 10
+  DEFAULT_ESTART = 0
+  DEFAULT_G4_FCL = "protoDUNE_g4_3ms_sce.fcl"
+  DEFAULT_DETSIM_FCL = "protoDUNE_detsim_pdnoise.fcl"
+  DEFAULT_RECO_FCL = "protoDUNE_reco.fcl"
+
   parser = argparse.ArgumentParser(description="Submits LArSoft Gen-G4-Detsim-Reco jobs to HTCondor as DAGs")
   parser.add_argument("-n","--nevents",type=int,required=True,help="Total number of events to generate")
-  parser.add_argument("-j","--neventsperjob",type=int,default=10,help="Number of events per job")
-  parser.add_argument("-e","--estart",type=int,default=0,help="First event number of first job")
+  parser.add_argument("-j","--neventsperjob",type=int,default=DEFAULT_NEVENTSPERJOB,help="Number of events per job, default: {}".format(DEFAULT_NEVENTSPERJOB))
+  parser.add_argument("-e","--estart",type=int,default=DEFAULT_ESTART,help="First event number of first job, default: {}".format(DEFAULT_ESTART))
   parser.add_argument("gen_fcl",help="fcl file to use for generation")
-  parser.add_argument("--g4_fcl",default="protoDUNE_g4_3ms_sce.fcl",help="fcl file to use for GEATN4 particle simulation")
-  parser.add_argument("--detsim_fcl",default="protoDUNE_detsim_pdnoise.fcl",help="fcl file to use for detector simulation")
-  parser.add_argument("--reco_fcl",default="protoDUNE_reco.fcl",help="fcl file to use for reconstruction")
+  parser.add_argument("--g4_fcl",default=DEFAULT_G4_FCL,help="fcl file to use for GEATN4 particle simulation, default: '{}'".format(DEFAULT_G4_FCL))
+  parser.add_argument("--detsim_fcl",default=DEFAULT_DETSIM_FCL,help="fcl file to use for detector simulation, default: '{}'".format(DEFAULT_DETSIM_FCL))
+  parser.add_argument("--reco_fcl",default=DEFAULT_RECO_FCL,help="fcl file to use for reconstruction, default: '{}'".format(DEFAULT_RECO_FCL))
   parser.add_argument("output_directory",help="output directory")
 
   args = parser.parse_args(['-n','30',"gen_single.fcl","/output"])
