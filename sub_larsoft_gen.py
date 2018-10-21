@@ -36,7 +36,7 @@ if __name__ == "__main__":
   parser.add_argument("--qual",default=DEFAULT_QUAL,help="dunetpc software qualifier, default: '{}'".format(DEFAULT_QUAL))
   parser.add_argument("output_directory",help="output directory")
 
-  args = parser.parse_args(['-n','30',"gen_single.fcl","/output"])
+  args = parser.parse_args()
 
   print("Generating {} events with {} events/job using gen fcl '{}' and output directory: '{}'".format(args.nevents,args.neventsperjob,args.gen_fcl,args.output_directory))
 
@@ -47,8 +47,11 @@ if __name__ == "__main__":
   genBase = os.path.splitext(genBase)[0]
   genBase = genBase.replace("gen_","")
   outDir = args.output_directory + "/{}_{}/".format(genBase,now)
+  os.makedirs(outDir)
+  #os.chmod(outDir,0o0755)
   logOutDir = "{}_{}/".format(genBase,now)
   os.makedirs(logOutDir)
+  #os.chmod(logOutDir,0o0755)
   runScriptFn = os.path.join(logOutDir,"run_larsoft_simple.sh")
   subScriptFn = os.path.join(logOutDir,"larsoft_gen.sub")
   shutil.copyfile("run_larsoft_simple.sh",runScriptFn)
@@ -82,11 +85,13 @@ if __name__ == "__main__":
     templateParams["iRun"] = iRun
     templateParams["nRuns"] = nRuns
     templateParams["outDir"] = outDir
-    print(templateParams)
     dagText = ""
     with open("templates/larsoft_gen.dag") as dagTemplateFile:
       dagTemplate = string.Template(dagTemplateFile.read())
       dagText = dagTemplate.substitute(templateParams)
-    dagFn = os.path.join(logOutDir,"job_{}.dag".format(iRun))
-    with open(dagFn,'w') as dag:
+    dagFn = "job_{}.dag".format(iRun)
+    with open(os.path.join(logOutDir,dagFn),'w') as dag:
       dag.write(dagText)
+    originaldir = os.getcwd()
+    print(originaldir)
+    subprocess.check_call(["condor_submit_dag",dagFn],cwd=logOutDir)
