@@ -19,7 +19,7 @@ if __name__ == "__main__":
   DEFAULT_NEVENTSPERJOB = 10
   DEFAULT_ESTART = 1
   DEFAULT_G4_FCL = "protoDUNE_g4_3ms_sce.fcl"
-  DEFAULT_DETSIM_FCL = "protoDUNE_detsim_pdnoise.fcl"
+  DEFAULT_DETSIM_FCL = "protoDUNE_detsim.fcl"
   DEFAULT_RECO_FCL = "protoDUNE_reco.fcl"
   DEFAULT_VERSION = "v07_07_01"
   DEFAULT_QUAL = "e17:prof"
