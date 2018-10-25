@@ -33,7 +33,7 @@ else
   fi
 fi
 cd $TMPDIR
-
+echo "DUNETPC_DIR="$DUNETPC_DIR
 
 echo "Running lar..."
 lar $@ >& log

@@ -93,9 +93,10 @@ if __name__ == "__main__":
   ## For setting up your own LArSoft
   setup_env_vars = ""
   if args.setup_script:
-    setup_env_vars=" $setup_script="+os.path.abspath(args.setup_script)
+    setup_env_vars=" setup_script="+os.path.abspath(args.setup_script)
     if args.setup_dir:
-      setup_env_vars+=" $setup_dir="+os.path.abspath(args.setup_dir)
+      setup_env_vars=" setup_script="+args.setup_script
+      setup_env_vars+=" setup_dir="+os.path.abspath(args.setup_dir)
 
   for iRun in range(nRuns):
     genOut = "events_{}_{}_{}_gen.root".format(genBase,now,iRun)
@@ -135,9 +136,9 @@ if __name__ == "__main__":
       dagTemplate = string.Template(dagTemplateFile.read())
       dagText = dagTemplate.substitute(templateParams)
     dagFn = "job_{}.dag".format(iRun)
-    print(dagText)
-    #with open(os.path.join(logOutDir,dagFn),'w') as dag:
-    #  dag.write(dagText)
-    #originaldir = os.getcwd()
-    #print(originaldir)
-    #subprocess.check_call(["condor_submit_dag",dagFn],cwd=logOutDir)
+    #print(dagText)
+    with open(os.path.join(logOutDir,dagFn),'w') as dag:
+      dag.write(dagText)
+    originaldir = os.getcwd()
+    print(originaldir)
+    subprocess.check_call(["condor_submit_dag",dagFn],cwd=logOutDir)
