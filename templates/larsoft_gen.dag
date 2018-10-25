@@ -10,7 +10,7 @@ PARENT DETSIM CHILD RECO
 #VARS ALL_NODES neventsperjob="$neventsperjob"
 #VARS ALL_NODES nRuns="$nRuns"
 #VARS ALL_NODES output_directory="$output_directory"
-VARS ALL_NODES env="\"version=$version qual=$qual nevents=$nevents neventsperjob=$neventsperjob output_directory=$output_directory iRun=$iRun ClusterId=$$(ClusterId) ProcId=$$(ProcId)\""
+VARS ALL_NODES env="\"version=$version qual=$qual nevents=$nevents neventsperjob=$neventsperjob output_directory=$output_directory iRun=$iRun ClusterId=$$(ClusterId) ProcId=$$(ProcId)$setup_env_vars\""
 
 VARS GEN Arguments="$gen_args"
 VARS G4 Arguments="$g4_args"
@@ -38,3 +38,8 @@ VARS GEN transfer_output_remaps="\"$gen_transfer_output_remaps\""
 VARS G4 transfer_output_remaps="\"$g4_transfer_output_remaps\""
 VARS DETSIM transfer_output_remaps="\"$detsim_transfer_output_remaps\""
 VARS RECO transfer_output_remaps="\"$reco_transfer_output_remaps\""
+
+VARS GEN transfer_input_files="$gen_transfer_input_files"
+VARS G4 transfer_input_files="$g4_transfer_input_files"
+VARS DETSIM transfer_input_files="$detsim_transfer_input_files"
+VARS RECO transfer_input_files="$reco_transfer_input_files"

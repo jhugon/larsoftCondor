@@ -34,6 +34,8 @@ if __name__ == "__main__":
   parser.add_argument("--reco_fcl",default=DEFAULT_RECO_FCL,help="fcl file to use for reconstruction, default: '{}'".format(DEFAULT_RECO_FCL))
   parser.add_argument("--version",default=DEFAULT_VERSION,help="dunetpc software version, default: '{}'".format(DEFAULT_VERSION))
   parser.add_argument("--qual",default=DEFAULT_QUAL,help="dunetpc software qualifier, default: '{}'".format(DEFAULT_QUAL))
+  parser.add_argument("--setup_script",default=None,help="if present, then source the given setup script to setup LArSoft rather than using --version and --qual (see --setup_dir)")
+  parser.add_argument("--setup_dir",default=None,help="if present, then cd to this dir before sourcing the setup script given in --setup_script")
   parser.add_argument("output_directory",help="output directory")
 
   args = parser.parse_args()
@@ -58,6 +60,43 @@ if __name__ == "__main__":
   shutil.copyfile("templates/larsoft_gen.sub",subScriptFn)
   os.chmod(runScriptFn,0o0755)
 
+  ### Check if fcl is a path to a file, then make sure the job uses that
+  gen_input_list = []
+  g4_input_list = []
+  detsim_input_list = []
+  reco_input_list = []
+  if os.path.isfile(os.path.abspath(args.gen_fcl)):
+    args.gen_fcl = os.path.abspath(args.gen_fcl)
+    print("Using file at path '{}' as gen fcl".format(args.gen_fcl))
+    gen_input_list.append(args.gen_fcl)
+  else:
+    print("Assuming '{}' gen fcl is in the LArSoft fcl path".format(args.gen_fcl))
+  if os.path.isfile(os.path.abspath(args.g4_fcl)):
+    args.g4_fcl = os.path.abspath(args.g4_fcl)
+    print("Using file at path '{}' as g4 fcl".format(args.g4_fcl))
+    g4_input_list.append(args.g4_fcl)
+  else:
+    print("Assuming '{}' g4 fcl is in the LArSoft fcl path".format(args.g4_fcl))
+  if os.path.isfile(os.path.abspath(args.detsim_fcl)):
+    args.detsim_fcl = os.path.abspath(args.detsim_fcl)
+    print("Using file at path '{}' as detsim fcl".format(args.detsim_fcl))
+    detsim_input_list.append(args.detsim_fcl)
+  else:
+    print("Assuming '{}' detsim fcl is in the LArSoft fcl path".format(args.detsim_fcl))
+  if os.path.isfile(os.path.abspath(args.reco_fcl)):
+    args.reco_fcl = os.path.abspath(args.reco_fcl)
+    print("Using file at path '{}' as reco fcl".format(args.reco_fcl))
+    reco_input_list.append(args.reco_fcl)
+  else:
+    print("Assuming '{}' reco fcl is in the LArSoft fcl path".format(args.reco_fcl))
+
+  ## For setting up your own LArSoft
+  setup_env_vars = ""
+  if args.setup_script:
+    setup_env_vars=" $setup_script="+os.path.abspath(args.setup_script)
+    if args.setup_dir:
+      setup_env_vars+=" $setup_dir="+os.path.abspath(args.setup_dir)
+
   for iRun in range(nRuns):
     genOut = "events_{}_{}_{}_gen.root".format(genBase,now,iRun)
     g4Out = os.path.splitext(genOut)[0] + "_g4.root"
@@ -76,6 +115,11 @@ if __name__ == "__main__":
       "detsim_transfer_output_remaps": "log={}/log_detsim_{};{}={}".format(outDir,iRun,detsimOut,os.path.join(outDir,detsimOut)),
       "reco_transfer_output_files": "log,{}".format(recoOut),
       "reco_transfer_output_remaps": "log={}/log_reco_{};{}={}".format(outDir,iRun,recoOut,os.path.join(outDir,recoOut)),
+
+      "gen_transfer_input_files": ",".join(gen_input_list),
+      "g4_transfer_input_files": ",".join(g4_input_list),
+      "detsim_transfer_input_files": ",".join(detsim_input_list),
+      "reco_transfer_input_files": ",".join(reco_input_list),
     }
     for job in ["gen","g4","detsim","reco"]:
       for fn in ["log","output","error"]:
@@ -85,13 +129,15 @@ if __name__ == "__main__":
     templateParams["iRun"] = iRun
     templateParams["nRuns"] = nRuns
     templateParams["outDir"] = outDir
+    templateParams["setup_env_vars"] = setup_env_vars
     dagText = ""
     with open("templates/larsoft_gen.dag") as dagTemplateFile:
       dagTemplate = string.Template(dagTemplateFile.read())
       dagText = dagTemplate.substitute(templateParams)
     dagFn = "job_{}.dag".format(iRun)
-    with open(os.path.join(logOutDir,dagFn),'w') as dag:
-      dag.write(dagText)
-    originaldir = os.getcwd()
-    print(originaldir)
-    subprocess.check_call(["condor_submit_dag",dagFn],cwd=logOutDir)
+    print(dagText)
+    #with open(os.path.join(logOutDir,dagFn),'w') as dag:
+    #  dag.write(dagText)
+    #originaldir = os.getcwd()
+    #print(originaldir)
+    #subprocess.check_call(["condor_submit_dag",dagFn],cwd=logOutDir)
