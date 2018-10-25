@@ -5,7 +5,7 @@
 # Default Configuration
 # infile and outdir are still required
 fcl=piAbsSelector.fcl
-histfile=piAbs_$Fn(infile).root
+histfile=$Fn(fcl)_$Fn(infile).root
 logfile=log_$Fn(infile)
 setup_script=setup.sh
 setup_dir=/scratch/jhugon/v07_07_01_e17debug
@@ -17,12 +17,13 @@ request_memory = 2048m
 
 ## Our Job
 executable = run_larsoft_options.sh
-log = $fn(fcl)_$Fn(infile).condorlog
-output = $fn(fcl)_$Fn(infile).stdout
-error = $fn(fcl)_$Fn(infile).stderr
+log = $Fn(fcl)_$Fn(infile).condorlog
+output = $Fn(fcl)_$Fn(infile).stdout
+error = $Fn(fcl)_$Fn(infile).stderr
+description = $(fcl) $Fn(infile)
 
 env="fcl=$(fcl) infile=$(infile) histfile=$(histfile) logfile=$(logfile) setup_script=$(setup_script) setup_dir=$(setup_dir) outdir=$(outdir)"
-transfer_output_files=$(histfile) $(logfile)
+transfer_output_files=$(histfile),$(logfile)
 transfer_output_remaps="$(histfile)=$(outdir)/$(histfile);$(logfile)=$(outdir)/$(logfile)"
 
 ### on the command line, you have to set Arguments="<lar command arguments>" env="<env vars to setup larsoft>"
