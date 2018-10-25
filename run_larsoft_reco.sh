@@ -2,9 +2,12 @@
 
 version=v07_07_00_01
 qual=prof:e17
+#overrides version and qual
+setup_dir=/scratch/jhugon/v07_07_03_01
+setup_script=setup.sh
+version="v07_07_03_01plustest"
 nmax=1000
-#outdir="/scratch/jhugon/np04_data/reco"
-outdir="/cshare/vol2/users/jhugon/condor_output/reco"
+outdir="/cshare/vol2/users/jhugon/condor_output/recoTest"
 
 if [ -z "$1" ]; then
     echo "No argument supplied, input raw data file required."
@@ -46,11 +49,22 @@ echo "=================================="
 echo "=================================="
 echo "=================================="
 
-echo "Setting up DUNE software"
-source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
-setup mrb
-setup dunetpc $version -q $qual
-echo "Done setting up DUNE software"
+if [ -z "$setup_script" ]; then # if no setups script, do default setup
+  echo "Setting up DUNE software"
+  source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh
+  setup mrb
+  setup dunetpc $version -q $qual
+  echo "Done setting up DUNE software"
+else
+  if [ -z "$setup_dir" ]; then
+    source $setup_script
+  else
+    cd $setup_dir
+    source $setup_script
+  fi
+  mrbslp
+fi
+cd $TMPDIR
 
 #nEventsTotal=$(python -c "import ROOT; f = ROOT.TFile(\"${infilename}\"); print f.Events.GetEntries()")
 #echo "Events in file: $nEventsTotal"

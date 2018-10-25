@@ -12,8 +12,10 @@ setup_dir=/scratch/jhugon/v07_07_01_e17debug
 
 ## Condor Settings
 universe = vanilla
-priority = 1000
+priority = 500
 request_memory = 2048m
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
 
 ## Our Job
 executable = run_larsoft_options.sh
