@@ -1,0 +1,35 @@
+# on the command line, run this like:
+# condor_submit larsoft_options.sub infile=dumb.root outdir=/scratch/jhugon/testCondorGen/
+# you can also add similar options from the default configuration block on the command line
+
+# Default Configuration
+# infile and outdir are still required
+fcl=piAbsSelector.fcl
+histfile=piAbs_$Fn(infile).root
+logfile=log_$Fn(infile)
+setup_script=setup.sh
+setup_dir=/scratch/jhugon/v07_07_01_e17debug
+
+## Condor Settings
+universe = vanilla
+priority = 1000
+request_memory = 2048m
+
+## Our Job
+executable = run_larsoft_options.sh
+log = $fn(fcl)_$Fn(infile).condorlog
+output = $fn(fcl)_$Fn(infile).stdout
+error = $fn(fcl)_$Fn(infile).stderr
+
+env="fcl=$(fcl) infile=$(infile) histfile=$(histfile) logfile=$(logfile) setup_script=$(setup_script) setup_dir=$(setup_dir) outdir=$(outdir)"
+transfer_output_files=$(histfile) $(logfile)
+transfer_output_remaps="$(histfile)=$(outdir)/$(histfile);$(logfile)=$(outdir)/$(logfile)"
+
+### on the command line, you have to set Arguments="<lar command arguments>" env="<env vars to setup larsoft>"
+# This either looks like:
+# condor_submit larsoft_simple.sub Arguments="-c protoDUNE_reco_data.fcl <inputfile> -T <histfile> -o <outputfile>" env="setup_script=setup.sh setup_dir=<path to run source setup.sh>"
+# or
+# condor_submit larsoft_simple.sub Arguments="-c protoDUNE_reco_data.fcl <inputfile> -T <histfile> -o <outputfile>" env="version=v07_07_01_01 qual=e17:debug"
+
+## Queue the Job
+queue
