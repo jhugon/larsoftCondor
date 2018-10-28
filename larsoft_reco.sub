@@ -10,7 +10,8 @@ nEventsPerJob = 1
 include : ./getNEvents.sh $(nEventsPerJob) $(Arguments) |
 
 ## Our Job
-executable = run_larsoft_reco.sh
+#executable = run_larsoft_reco.sh
+executable = run_larsoft_keepup.sh
 #Too many jobs now send these to /dev/null
 #log = reco_$Fn(Arguments)_job$(ProcId).condorlog
 #output = reco_$Fn(Arguments)_job$(ProcId).stdout
