@@ -1,8 +1,8 @@
 #!/bin/bash
 
-echo $@ >& /scratch/jhugon/condor/args.txt
+echo $@ >& args.txt
 
-version=v07_07_00_01
+version=v07_08_00_03
 qual=prof:e17
 
 if [ -z "$1" ]; then
