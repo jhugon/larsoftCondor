@@ -8,7 +8,7 @@ fcl=piAbsSelector.fcl
 histfile=$Fn(fcl)_$Fn(infile).root
 logfile=log_$Fn(infile)
 setup_script=setup.sh
-setup_dir=/scratch/jhugon/v07_07_01_e17debug
+setup_dir=/scratch/jhugon/v07_09_00/
 
 ## Condor Settings
 universe = vanilla
