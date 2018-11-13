@@ -5,7 +5,7 @@ priority = 1000
 request_memory = 2048m
 
 # figure out how many jobs to run
-nEventsPerJob = 10
+nEventsPerJob = 5
 # defines nEventsTotal and nJobs
 include : ./getNEvents.sh $(nEventsPerJob) $(Arguments) |
 

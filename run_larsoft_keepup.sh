@@ -1,13 +1,13 @@
 #!/bin/bash
 
-version=v07_08_00_03
+version=v07_08_00_04
 qual=prof:e17
 #overrides version and qual
 #setup_dir=/scratch/jhugon/v07_07_03_01
 #setup_script=setup.sh
 #version="v07_07_03_01plustest"
 nmax=1000
-outdir="/cshare/vol2/users/jhugon/condor_output/reco_keepup_v07_08_00_03"
+outdir="/cshare/vol2/users/jhugon/condor_output/reco_keepup_v07_08_00_04"
 
 if [ -z "$1" ]; then
     echo "No argument supplied, input raw data file required."
