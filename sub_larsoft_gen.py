@@ -36,6 +36,7 @@ if __name__ == "__main__":
   parser.add_argument("--qual",default=DEFAULT_QUAL,help="dunetpc software qualifier, default: '{}'".format(DEFAULT_QUAL))
   parser.add_argument("--setup_script",default=None,help="if present, then source the given setup script to setup LArSoft rather than using --version and --qual (see --setup_dir)")
   parser.add_argument("--setup_dir",default=None,help="if present, then cd to this dir before sourcing the setup script given in --setup_script")
+  parser.add_argument("--outname",deffault=None,help="if present, use this as the basename for the output directory and files, otherwise use a substring of the gen fcl")
   parser.add_argument("output_directory",help="output directory")
 
   args = parser.parse_args()
@@ -48,10 +49,13 @@ if __name__ == "__main__":
   genBase = os.path.basename(args.gen_fcl)
   genBase = os.path.splitext(genBase)[0]
   genBase = genBase.replace("gen_","")
-  outDir = args.output_directory + "/{}_{}/".format(genBase,now)
+  outName = genBase
+  if args.outname:
+    outName = args.outname
+  outDir = args.output_directory + "/{}_{}/".format(outName,now)
   os.makedirs(outDir)
   #os.chmod(outDir,0o0755)
-  logOutDir = "{}_{}/".format(genBase,now)
+  logOutDir = "{}_{}/".format(outName,now)
   os.makedirs(logOutDir)
   #os.chmod(logOutDir,0o0755)
   runScriptFn = os.path.join(logOutDir,"run_larsoft_simple.sh")
@@ -99,7 +103,7 @@ if __name__ == "__main__":
       setup_env_vars+=" setup_dir="+os.path.abspath(args.setup_dir)
 
   for iRun in range(nRuns):
-    genOut = "events_{}_{}_{}_gen.root".format(genBase,now,iRun)
+    genOut = "events_{}_{}_{}_gen.root".format(outName,now,iRun)
     g4Out = os.path.splitext(genOut)[0] + "_g4.root"
     detsimOut = os.path.splitext(g4Out)[0] + "_detsim.root"
     recoOut = os.path.splitext(detsimOut)[0] + "_reco.root"
